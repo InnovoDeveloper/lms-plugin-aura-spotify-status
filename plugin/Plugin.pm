@@ -184,6 +184,15 @@ sub _errors {
         (my $mod = $lg) =~ s{.*/}{}; $mod =~ s/\.(log|err)$//;
         for my $ln (@lines) {
             next unless $ln =~ /\b(err|error|warn|fail|429|missing|denied|invalid)\b/i;
+            # Suppress benign, self-resolved watchdog chatter — these match "missing"
+            # but are informational, not faults:
+            #   "Aura-M MISSING (1/3)" / "(2/3)" — a transient blip that hadn't yet hit
+            #     the heal threshold (only "(3/3)" means it actually acted → keep that).
+            #   "back (was missing ...)" — a recovery notice.
+            #   "watchdog start ..." — a startup banner.
+            next if $ln =~ /MISSING \([0-2]\/\d+\)/;   # under-threshold blip (3/3+ kept)
+            next if $ln =~ /back \(was missing/i;       # recovered
+            next if $ln =~ /watchdog start/i;           # startup banner
             chomp $ln; push @rows, { module => $mod, message => substr($ln, 0, 120) };
         }
     }
