@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<extension>
+  <id>A5B7C9D1-2E3F-4A5B-8C7D-AURASPOTIFY01</id>
+  <name>PLUGIN_AURASPOTIFYSTATUS_NAME</name>
+  <version>__VERSION__</version>
+  <description>PLUGIN_AURASPOTIFYSTATUS_DESC</description>
+  <creator>InnovoDeveloper</creator>
+  <homepageURL>https://github.com/InnovoDeveloper/MC-UpdateScripts</homepageURL>
+  <module>Plugins::AuraSpotifyStatus::Plugin</module>
+  <optionsURL>plugins/AuraSpotifyStatus/status.html</optionsURL>
+  <type>2</type>
+  <targetApplication>
+    <id>Logitech Media Server</id>
+    <minVersion>8.3</minVersion>
+    <maxVersion>*</maxVersion>
+  </targetApplication>
+</extension>

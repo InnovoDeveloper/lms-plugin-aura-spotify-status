@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'   # e.g. 0.1.0 (no leading 'v')
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve plugin metadata
+        id: meta
+        run: |
+          RAW_TAG="${GITHUB_REF_NAME}"
+          VERSION="${RAW_TAG}"
+          NAME="$(sed -n 's,.*<plugin.*name="\([^"]*\)".*,\1,p' misc/repo.xml)"
+          ZIP="lms-plugin-${NAME}-${VERSION}.zip"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "name=${NAME}"       >> "$GITHUB_OUTPUT"
+          echo "zip=${ZIP}"         >> "$GITHUB_OUTPUT"
+          echo "tag=${RAW_TAG}"     >> "$GITHUB_OUTPUT"
+
+      - name: Build distribution
+        run: |
+          make dist PLUGIN_VERSION="${{ steps.meta.outputs.version }}"
+          ls -la obj/dist/
+
+      - name: Compute zip SHA1
+        id: sha
+        run: |
+          SHA="$(shasum obj/dist/${{ steps.meta.outputs.zip }} | cut -d' ' -f1)"
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.tag }}
+          body: |
+            Aura Spotify Status LMS plugin build `${{ steps.meta.outputs.version }}`.
+
+            Asset: `${{ steps.meta.outputs.zip }}`
+            SHA1: `${{ steps.sha.outputs.sha }}`
+
+            Subscribe LMS to the extensions repo at:
+            <https://innovodeveloper.github.io/lms-plugin-aura-spotify-status/extensions.xml>
+
+            and the LMS plugin manager will pick this version up automatically.
+          files: |
+            obj/dist/${{ steps.meta.outputs.zip }}
+            obj/dist/extensions.xml
+          fail_on_unmatched_files: true
+
+      - name: Stage gh-pages content
+        run: |
+          mkdir -p public
+          cp obj/dist/extensions.xml public/extensions.xml
+          cat > public/index.html <<HTML
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>Aura Spotify Status LMS plugin</title></head>
+          <body>
+          <h1>Aura Spotify Status LMS plugin</h1>
+          <p>Health/status dashboard for the Aura Spotify-in-LMS system. Standalone plugin — survives Spotty updates.</p>
+          <p>Subscribe LMS to:
+             <code>https://innovodeveloper.github.io/lms-plugin-aura-spotify-status/extensions.xml</code></p>
+          <p>Latest published version: <strong>${{ steps.meta.outputs.version }}</strong></p>
+          </body></html>
+          HTML
+
+      - name: Publish extensions.xml to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          force_orphan: true
+          commit_message: "publish extensions.xml for ${{ steps.meta.outputs.tag }}"

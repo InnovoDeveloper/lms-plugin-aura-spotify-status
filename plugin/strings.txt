@@ -1,0 +1,5 @@
+PLUGIN_AURASPOTIFYSTATUS_NAME
+	EN	Aura Spotify Status
+
+PLUGIN_AURASPOTIFYSTATUS_DESC
+	EN	Health and status dashboard for the Aura Spotify-in-LMS system (Widevine/Electron decoder, services, auth). Standalone — survives Spotty plugin updates.

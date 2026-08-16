@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<extensions>
+  <details>
+    <title lang="EN">Aura Spotify Status (Innovo)</title>
+  </details>
+  <plugins>
+    <plugin name="AuraSpotifyStatus" version="__VERSION__" minTarget="8.3.0" maxTarget="*">
+      <title lang="EN">Aura Spotify Status</title>
+      <desc lang="EN">Health/status dashboard for the Aura Spotify-in-LMS system (Widevine/Electron decoder, services, auth). Standalone — survives Spotty plugin updates.</desc>
+      <category>tools</category>
+      <url>__ZIPURL__</url>
+      <sha>__SHA__</sha>
+      <creator>InnovoDeveloper</creator>
+    </plugin>
+  </plugins>
+</extensions>
